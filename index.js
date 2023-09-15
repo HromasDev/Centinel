@@ -7,12 +7,12 @@ client.on(Events.ClientReady, () => {
   const currentDate = new Date();
   console.log(`${currentDate.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | Бот запущен.`);
   
-  const guild = client.guilds.cache.get(serverId);
+  const guild = client.guilds.cache.get(process.env.SERVER_ID);
 
   let userStatus = null;
 
   async function checkStatus() {
-    return guild.members.fetch(targetId).then(member => {
+    return guild.members.fetch(process.env.TARGET_ID).then(member => {
       return member;
     });
   }
@@ -20,7 +20,7 @@ client.on(Events.ClientReady, () => {
   setInterval(() => {
     checkStatus().then((user) => {
       if (user.presence && user.presence.status == 'online' && userStatus !== 'online') {
-        guild.members.fetch(receiverId).then(member => {
+        guild.members.fetch(process.env.RECEIVER_ID).then(member => {
           date = new Date();
           member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | **${user} теперь в сети!**`)
         });
@@ -31,4 +31,4 @@ client.on(Events.ClientReady, () => {
 
 });
 
-client.login(token);
+client.login(process.env.TOKEN);
