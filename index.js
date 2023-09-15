@@ -1,5 +1,5 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
-import('./server.js')
+const server = require('./server.js')
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences] });
 
@@ -32,3 +32,5 @@ client.on(Events.ClientReady, () => {
 });
 
 client.login(process.env.TOKEN);
+
+server();
