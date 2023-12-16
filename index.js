@@ -40,7 +40,7 @@ client.on('messageCreate', msg => {
         limit = +command.split(' ')[2];
       } else msg.reply('Указан неверный параметр!');
     }
-  } else msg.reply('**Для взаимодействия с ботом используйте префикс `!` например: `!помощь`**');
+  }
 });
 
 client.on(Events.ClientReady, () => {
