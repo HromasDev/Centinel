@@ -3,11 +3,11 @@ const keepAlive = require('./server.js')
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages] });
 
 let limit = 99999;
 let compact = false;
-client.on('messageCreate', (msg) => {
+client.on('messageCreate', msg => {
   console.log('test');
   if (msg.content.startsWith('!')) {
     const args = msg.content.slice(1).trim().split(/ +/g);
