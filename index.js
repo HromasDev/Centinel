@@ -53,22 +53,21 @@ client.on(Events.ClientReady, () => {
         let isFindNewProduct = oldProducts.find(({ name }) => name === productList[0].name);
 
         guild.members.fetch(process.env.RECEIVER_ID).then(member => {
-          date = new Date();
           if (oldPrice == newPrice) {
             if (!isFindNewProduct) {
-              member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | На маркете появилось новое предложение от ${productList[0].seller} за ${productList[0].price}`);
+              member.send(`**На маркете появилось новое предложение от ${productList[0].seller} за ${productList[0].price}**`);
               fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
 
             }
             // ничего не поменялось
           } else {
             if (!isFindNewProduct) {
-              member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | На маркете появилось новое предложение от ${productList[0].seller}, где ${productList[0].name} дешевле ${oldProducts[0].name} от ${oldProducts[0].seller} на ${oldPrice - newPrice} руб.`)
+              member.send(`**На маркете появилось новое предложение от ${productList[0].seller}, где ${productList[0].name} дешевле ${oldProducts[0].name} от ${oldProducts[0].seller} на ${oldPrice - newPrice} руб.**`)
             }
-            else if (oldPrice > newPrice) member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | ${oldProducts[0].name} от ${oldProducts[0].seller} подешевел на ${oldPrice - newPrice} руб!\n`)
-            else if (oldPrice < newPrice) member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | ${oldProducts[0].name} от ${oldProducts[0].seller} подорожал на ${newPrice - oldPrice} руб!\n`)
+            else if (oldPrice > newPrice) member.send(`**${oldProducts[0].name} от ${oldProducts[0].seller} подешевел на ${oldPrice - newPrice} руб! :chart_with_downwards_trend: \n**`)
+            else if (oldPrice < newPrice) member.send(`**${oldProducts[0].name} от ${oldProducts[0].seller} подорожал на ${newPrice - oldPrice} руб! :chart_with_upwards_trend: \n**`)
 
-            member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | Было: ${oldPrice} руб. \nСтало: ${newPrice} руб.`)
+            member.send(`**Было: ${oldPrice} руб. \nСтало: ${newPrice} руб.**`)
 
             fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
           }
