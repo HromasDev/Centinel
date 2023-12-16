@@ -22,40 +22,38 @@ client.on(Events.ClientReady, () => {
   let limit = 99999;
   const compact = false;
   client.on('message', msg => {
-    if (msg.channel.type === 'dm') {
-      if (msg.content.startsWith('!')) {
-        const args = msg.content.slice(1).trim().split(/ +/g);
-        const command = args.shift().toLowerCase();
+    if (msg.content.startsWith('!')) {
+      const args = msg.content.slice(1).trim().split(/ +/g);
+      const command = args.shift().toLowerCase();
 
-        switch (command) {
-          case 'помощь':
-            msg.reply('**Существуют такие команды как:\n`!компакт` - устанавливает компактный режим отображения.\n`!лимит` - создает лимит (порог) на цену товара, если у вас есть определенный бюджет (к примеру 1000 руб), и вы хотите не получать постоянно информацию о изменении цены которая вас не устраивает, достаточно указать `!лимит добавить 1000`, или `!лимит удалить`**');
-            break;
-          case 'лимит':
-            msg.reply('**`!лимит создать N` - создает лимит\n`!лимит удалить` - удаляет лимит**');
-            break;
-          case 'лимит удалить':
-            msg.reply('Выполняется команда !лимит удалить');
-            break;
-          case 'компакт':
-            if (compact == false) {
-              msg.reply('Активирован компактный режим!');
-              compact = true
-            } else {
-              msg.reply('Деактивирован компактный режим!');
-              compact = false;
-            }
-            break;
-          default:
-            msg.reply('Извините, я не понимаю эту команду.');
-        }
-        if (command.startsWith('лимит создать ')) {
-          if (command.split(' ')[2]) {
-            limit = +command.split(' ')[2];
-          } else msg.reply('Указан неверный параметр!');
-        }
-      } else msg.reply('**Для взаимодействия с ботом используйте префикс `!` например: `!помощь`**');
-    }
+      switch (command) {
+        case 'помощь':
+          msg.reply('**Существуют такие команды как:\n`!компакт` - устанавливает компактный режим отображения.\n`!лимит` - создает лимит (порог) на цену товара, если у вас есть определенный бюджет (к примеру 1000 руб), и вы хотите не получать постоянно информацию о изменении цены которая вас не устраивает, достаточно указать `!лимит добавить 1000`, или `!лимит удалить`**');
+          break;
+        case 'лимит':
+          msg.reply('**`!лимит создать N` - создает лимит\n`!лимит удалить` - удаляет лимит**');
+          break;
+        case 'лимит удалить':
+          msg.reply('Выполняется команда !лимит удалить');
+          break;
+        case 'компакт':
+          if (compact == false) {
+            msg.reply('Активирован компактный режим!');
+            compact = true
+          } else {
+            msg.reply('Деактивирован компактный режим!');
+            compact = false;
+          }
+          break;
+        default:
+          msg.reply('Извините, я не понимаю эту команду.');
+      }
+      if (command.startsWith('лимит создать ')) {
+        if (command.split(' ')[2]) {
+          limit = +command.split(' ')[2];
+        } else msg.reply('Указан неверный параметр!');
+      }
+    } else msg.reply('**Для взаимодействия с ботом используйте префикс `!` например: `!помощь`**');
   });
 
   setInterval(() => {
@@ -96,7 +94,7 @@ client.on(Events.ClientReady, () => {
           if (compact) {
             if (oldPrice !== newPrice) {
               fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
-              if(newPrice <= limit) {
+              if (newPrice <= limit) {
                 member.send('```diff \n' + function () { if (oldPrice > newPrice) return `+ ${oldPrice} руб. -> ${newPrice} руб.`; else return `- ${oldPrice} руб. -> ${newPrice} руб.` } + '```');
               }
             }
