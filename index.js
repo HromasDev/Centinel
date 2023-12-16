@@ -53,6 +53,7 @@ client.on(Events.ClientReady, () => {
         let isFindNewProduct = oldProducts.find(({ name }) => name === productList[0].name);
 
         guild.members.fetch(process.env.RECEIVER_ID).then(member => {
+          date = new Date();
           if (oldPrice == newPrice) {
             if (!isFindNewProduct) {
               member.send(`${date.toLocaleString('RU-ru', { timeZone: 'Asia/Omsk' })} | На маркете появилось новое предложение от ${productList[0].seller} за ${productList[0].price}`);
