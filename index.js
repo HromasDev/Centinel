@@ -6,8 +6,9 @@ const fs = require('fs');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences] });
 
 let limit = 99999;
-const compact = false;
+let compact = false;
 client.on('message', msg => {
+  msg.reply('work');
   if (msg.content.startsWith('!')) {
     const args = msg.content.slice(1).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
