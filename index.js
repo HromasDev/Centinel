@@ -41,7 +41,8 @@ client.on(Events.ClientReady, () => {
             name: $(`table > tbody > tr:nth-child(${i}) > td.product-title > div > a`).text(),
             seller: $(`table > tbody > tr:nth-child(${i}) > td.product-merchant > div > a`).text(),
             sales: $(`table > tbody > tr:nth-child(${i}) > td.product-sold > div`).text(),
-            price: $(`table > tbody > tr:nth-child(${i}) > td.product-price`).text()
+            price: $(`table > tbody > tr:nth-child(${i}) > td.product-price`).text(),
+            href: $(`table > tbody > tr:nth-child(${i}) > td.product-title > div > a`).attr("href")
           })
         }
 
@@ -55,17 +56,17 @@ client.on(Events.ClientReady, () => {
         guild.members.fetch(process.env.RECEIVER_ID).then(member => {
           if (oldPrice == newPrice) {
             if (!isFindNewProduct) {
-              member.send(`**На маркете появилось новое предложение от ${productList[0].seller} за ${productList[0].price}**`);
+              member.send(`**На маркете появилось [новое предложение](https://plati.market${productList[0].href}) от ${productList[0].seller} за ${productList[0].price}**`);
               fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
 
             }
             // ничего не поменялось
           } else {
             if (!isFindNewProduct) {
-              member.send(`**На маркете появилось новое предложение от ${productList[0].seller}, где ${productList[0].name} дешевле ${oldProducts[0].name} от ${oldProducts[0].seller} на ${oldPrice - newPrice} руб.**`)
+              member.send(`**На маркете появилось [новое предложение](https://plati.market${productList[0].href}) от ${productList[0].seller}, где ${productList[0].name} дешевле ${oldProducts[0].name} от ${oldProducts[0].seller} на ${oldPrice - newPrice} руб.**`)
             }
-            else if (oldPrice > newPrice) member.send(`**${oldProducts[0].name} от ${oldProducts[0].seller} подешевел на ${oldPrice - newPrice} руб! :chart_with_downwards_trend: \n**`)
-            else if (oldPrice < newPrice) member.send(`**${oldProducts[0].name} от ${oldProducts[0].seller} подорожал на ${newPrice - oldPrice} руб! :chart_with_upwards_trend: \n**`)
+            else if (oldPrice > newPrice) member.send(`**[${oldProducts[0].name}](https://plati.market${oldProducts[0].href}) от ${oldProducts[0].seller} подешевел на ${oldPrice - newPrice} руб! :chart_with_downwards_trend: \n**`)
+            else if (oldPrice < newPrice) member.send(`**[${oldProducts[0].name}](https://plati.market${oldProducts[0].href}) от ${oldProducts[0].seller} подорожал на ${newPrice - oldPrice} руб! :chart_with_upwards_trend: \n**`)
 
             member.send(`**Было: ${oldPrice} руб. \nСтало: ${newPrice} руб.**`)
 
