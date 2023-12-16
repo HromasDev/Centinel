@@ -7,8 +7,8 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 let limit = 99999;
 let compact = false;
-client.on('messageCreate', msg => {
-  msg.reply('work');
+client.on('messageCreate', (msg) => {
+  console.log('test');
   if (msg.content.startsWith('!')) {
     const args = msg.content.slice(1).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
