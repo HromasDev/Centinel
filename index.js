@@ -19,6 +19,45 @@ client.on(Events.ClientReady, () => {
     });
   }
 
+  let limit = 99999;
+  const compact = false;
+  client.on('message', msg => {
+    if (msg.channel.type === 'dm') {
+      if (msg.content.startsWith('!')) {
+        const args = msg.content.slice(1).trim().split(/ +/g);
+        const command = args.shift().toLowerCase();
+
+        switch (command) {
+          case 'помощь':
+            msg.reply('**Существуют такие команды как:\n`!компакт` - устанавливает компактный режим отображения.\n`!лимит` - создает лимит (порог) на цену товара, если у вас есть определенный бюджет (к примеру 1000 руб), и вы хотите не получать постоянно информацию о изменении цены которая вас не устраивает, достаточно указать `!лимит добавить 1000`, или `!лимит удалить`**');
+            break;
+          case 'лимит':
+            msg.reply('**`!лимит создать N` - создает лимит\n`!лимит удалить` - удаляет лимит**');
+            break;
+          case 'лимит удалить':
+            msg.reply('Выполняется команда !лимит удалить');
+            break;
+          case 'компакт':
+            if (compact == false) {
+              msg.reply('Активирован компактный режим!');
+              compact = true
+            } else {
+              msg.reply('Деактивирован компактный режим!');
+              compact = false;
+            }
+            break;
+          default:
+            msg.reply('Извините, я не понимаю эту команду.');
+        }
+        if (command.startsWith('лимит создать ')) {
+          if (command.split(' ')[2]) {
+            limit = +command.split(' ')[2];
+          } else msg.reply('Указан неверный параметр!');
+        }
+      } else msg.reply('**Для взаимодействия с ботом используйте префикс `!` например: `!помощь`**');
+    }
+  });
+
   setInterval(() => {
     checkStatus().then((user) => {
       if (user.presence && user.presence.status == 'online' && userStatus !== 'online') {
@@ -54,24 +93,36 @@ client.on(Events.ClientReady, () => {
         let isFindNewProduct = oldProducts.find(({ name }) => name === productList[0].name);
 
         guild.members.fetch(process.env.RECEIVER_ID).then(member => {
-          if (oldPrice == newPrice) {
-            if (!isFindNewProduct) {
-              member.send(`**На маркете появилось [новое предложение](https://plati.market${productList[0].href}) от ${productList[0].seller} за ${productList[0].price}**`);
+          if (compact) {
+            if (oldPrice !== newPrice) {
               fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
-
+              if(newPrice <= limit) {
+                member.send('```diff \n' + function () { if (oldPrice > newPrice) return `+ ${oldPrice} руб. -> ${newPrice} руб.`; else return `- ${oldPrice} руб. -> ${newPrice} руб.` } + '```');
+              }
             }
-            // ничего не поменялось
           } else {
-            if (!isFindNewProduct) {
-              member.send(`**На маркете появилось [новое предложение](https://plati.market${productList[0].href}) от ${productList[0].seller}, где ${productList[0].name} дешевле ${oldProducts[0].name} от ${oldProducts[0].seller} на ${oldPrice - newPrice} руб.**`)
+            if (oldPrice == newPrice) {
+              if (!isFindNewProduct) {
+                if (newPrice <= limit) {
+                  member.send(`** На маркете появилось[новое предложение](https://plati.market${productList[0].href}) от ${productList[0].seller} за ${productList[0].price}**`);
+                }
+                fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
+              }
+              // ничего не поменялось
+            } else {
+              if (newPrice <= limit) {
+                if (!isFindNewProduct) {
+                  member.send(`**На маркете появилось [новое предложение](https://plati.market${productList[0].href}) от ${productList[0].seller}, где ${productList[0].name} дешевле ${oldProducts[0].name} от ${oldProducts[0].seller} на ${oldPrice - newPrice} руб.**`)
+                }
+                else if (oldPrice > newPrice) member.send(`**${oldProducts[0].name} от ${oldProducts[0].seller} подешевел на ${oldPrice - newPrice} руб! :chart_with_downwards_trend: \n https://plati.market${oldProducts[0].href}**`)
+                else if (oldPrice < newPrice) member.send(`**${oldProducts[0].name} от ${oldProducts[0].seller} подорожал на ${newPrice - oldPrice} руб! :chart_with_upwards_trend: \n https://plati.market${oldProducts[0].href}**`)
+
+                member.send(`**Было: ${oldPrice} руб. \nСтало: ${newPrice} руб.**`)
+              }
+              fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
             }
-            else if (oldPrice > newPrice) member.send(`**[${oldProducts[0].name}](https://plati.market${oldProducts[0].href}) от ${oldProducts[0].seller} подешевел на ${oldPrice - newPrice} руб! :chart_with_downwards_trend: \n**`)
-            else if (oldPrice < newPrice) member.send(`**[${oldProducts[0].name}](https://plati.market${oldProducts[0].href}) от ${oldProducts[0].seller} подорожал на ${newPrice - oldPrice} руб! :chart_with_upwards_trend: \n**`)
-
-            member.send(`**Было: ${oldPrice} руб. \nСтало: ${newPrice} руб.**`)
-
-            fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
           }
+
         })
       })
       .catch(error => console.error('Error:', error.message));
