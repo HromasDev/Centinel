@@ -48,7 +48,6 @@ client.on('messageCreate', msg => {
               msg.reply('**`!лимит создать N` - создает лимит**');
               break;
           }
-
           break;
         case 'компакт':
           if (compact == false) {
@@ -114,12 +113,20 @@ client.on(Events.ClientReady, () => {
 
         let isFindNewProduct = oldProducts.find(({ name }) => name === productList[0].name);
 
+        function getPriceChange(oldPrice, newPrice) {
+          if (oldPrice > newPrice) {
+            return `+ ${oldPrice} руб. -> ${newPrice} руб.`;
+          } else {
+            return `- ${oldPrice} руб. -> ${newPrice} руб.`;
+          }
+        }
+
         guild.members.fetch(process.env.RECEIVER_ID).then(member => {
           if (compact) {
             if (oldPrice !== newPrice) {
               fs.writeFileSync('data.json', JSON.stringify(productList, null, 4));
               if (newPrice <= limit) {
-                member.send('```diff \n' + function () { if (oldPrice > newPrice) return `+ ${oldPrice} руб. -> ${newPrice} руб.`; else return `- ${oldPrice} руб. -> ${newPrice} руб.` } + '```');
+                member.send('```diff\n' + getPriceChange(oldPrice, newPrice) + '```[ССЫЛКА](https://plati.market'+ productList[0].href +')\n');
               }
             }
           } else {
@@ -152,6 +159,6 @@ client.on(Events.ClientReady, () => {
 });
 
 
-client.login('OTM0NTA5NzUwNzgyMTQ0NTky.GELCuL.8RJNUNoCZNtoTLCSv2C5-MBiCCqz1fWLMcsMv4');
+client.login(process.env.TOKEN);
 
 keepAlive();
