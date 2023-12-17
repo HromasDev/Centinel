@@ -1,46 +1,69 @@
-const { Client, Events, GatewayIntentBits } = require('discord.js');
 const keepAlive = require('./server.js')
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages] });
-
 let limit = 99999;
 let compact = false;
-client.on('messageCreate', msg => {
-  console.log('test');
-  if (msg.content.startsWith('!')) {
-    const args = msg.content.slice(1).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
 
-    switch (command) {
-      case 'помощь':
-        msg.reply('**Существуют такие команды как:\n`!компакт` - устанавливает компактный режим отображения.\n`!лимит` - создает лимит (порог) на цену товара, если у вас есть определенный бюджет (к примеру 1000 руб), и вы хотите не получать постоянно информацию о изменении цены которая вас не устраивает, достаточно указать `!лимит добавить 1000`, или `!лимит удалить`**');
-        break;
-      case 'лимит':
-        msg.reply('**`!лимит создать N` - создает лимит\n`!лимит удалить` - удаляет лимит**');
-        break;
-      case 'лимит удалить':
-        msg.reply('Выполняется команда !лимит удалить');
-        break;
-      case 'компакт':
-        if (compact == false) {
-          msg.reply('Активирован компактный режим!');
-          compact = true
-        } else {
-          msg.reply('Деактивирован компактный режим!');
-          compact = false;
-        }
-        break;
-      default:
-        msg.reply('Извините, я не понимаю эту команду.');
-    }
-    if (command.startsWith('лимит создать ')) {
-      if (command.split(' ')[2]) {
-        limit = +command.split(' ')[2];
-      } else msg.reply('Указан неверный параметр!');
-    }
-  } else msg.reply('**Для взаимодействия с ботом используйте префикс `!` например: `!помощь`**');
+// Импорт библиотеки discord.js
+const { Client, Events, GatewayIntentBits, Partials, ChannelType } = require('discord.js');
+
+// Создание нового клиента Discord
+const client = new Client({
+  intents: [
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.MessageContent
+  ],
+  partials: [
+    Partials.Channel,
+    Partials.Message
+  ]
+})
+
+client.once('ready', () => {
+  console.log('Бот готов!');
+});
+
+client.on('messageCreate', msg => {
+  if (msg.channel.type === ChannelType.DM) {
+    if (msg.content.startsWith('!')) {
+      const args = msg.content.slice(1).trim().split(/ +/g);
+      const command = args.shift().toLowerCase();
+
+      switch (command) {
+        case 'помощь':
+          msg.reply('**Существуют такие команды как:\n`!компакт` - устанавливает компактный режим отображения.\n`!лимит` - создает лимит (порог) на цену товара, если у вас есть определенный бюджет (к примеру 1000 руб), и вы хотите не получать постоянно информацию о изменении цены которая вас не устраивает, достаточно указать `!лимит добавить 1000`**');
+          break;
+        case 'лимит':
+          switch (args[0]) {
+            case 'создать':
+              if (!isNaN(args[1])) {
+                limit = +args[1];
+                msg.reply(`**Лимит ${args[1]} руб. создан**`);
+              } else if (!args[1]) {
+                msg.reply(`**Укажите параметр**`);
+              } else msg.reply(`**Указан неверный формат**`);
+              break;
+            default:
+              msg.reply('**`!лимит создать N` - создает лимит**');
+              break;
+          }
+
+          break;
+        case 'компакт':
+          if (compact == false) {
+            msg.reply('Активирован компактный режим!');
+            compact = true
+          } else {
+            msg.reply('Деактивирован компактный режим!');
+            compact = false;
+          }
+          break;
+        default:
+          msg.reply('Извините, я не понимаю эту команду.');
+      }
+    };
+  }
 });
 
 client.on(Events.ClientReady, () => {
@@ -128,6 +151,7 @@ client.on(Events.ClientReady, () => {
   }, 10000)
 });
 
-client.login(process.env.TOKEN);
+
+client.login('OTM0NTA5NzUwNzgyMTQ0NTky.GELCuL.8RJNUNoCZNtoTLCSv2C5-MBiCCqz1fWLMcsMv4');
 
 keepAlive();
