@@ -8,18 +8,21 @@ const defaultState: AppState = {
   limit: 99999,
   compact: false,
   lastKnownProducts: [],
+  ggselProduct: '',
+  ggselLimit: 99999,
+  ggselLastKnownProducts: [],
 };
 
 export function readState(): AppState {
   try {
     if (fs.existsSync(DATA_FILE)) {
       const rawData = fs.readFileSync(DATA_FILE, 'utf-8');
-      return JSON.parse(rawData);
+      return { ...defaultState, ...JSON.parse(rawData) };
     }
   } catch (error) {
     console.error('Ошибка чтения файла состояния, будет использовано состояние по умолчанию:', error);
   }
-  return defaultState;
+  return { ...defaultState };
 }
 
 export function writeState(state: AppState): void {

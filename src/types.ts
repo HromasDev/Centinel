@@ -12,6 +12,9 @@ export interface AppState {
   limit: number;
   compact: boolean;
   lastKnownProducts: Product[];
+  ggselProduct: string;
+  ggselLimit: number;
+  ggselLastKnownProducts: Product[];
 }
 
 export interface CustomContext extends Context {

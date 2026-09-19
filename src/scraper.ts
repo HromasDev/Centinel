@@ -4,6 +4,14 @@ import { Product } from './types.ts';
 import { config } from './config.ts';
 
 const PLATI_MARKET_URL = 'https://plati.market/asp/block_goods_category_2.asp';
+const GGSEL_API_URL = 'https://api.ggsel.com/buybox/goods';
+const GGSEL_PRODUCT_URL = 'https://ggsel.net/catalog/product/';
+const REQUEST_TIMEOUT_MS = 30000;
+const USER_AGENT ='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36';
+
+export function productLink(href: string): string {
+  return href.startsWith('http') ? href : `https://plati.market${href}`;
+}
 
 function parsePrice(priceText: string): number {
   const cleanedText = priceText.replace(/[^0-9,.]/g, '').replace(',', '.');
@@ -22,8 +30,9 @@ export async function fetchTopProducts(): Promise<Product[]> {
         'lang': 'ru-RU'
       },
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
-      }
+        'User-Agent': USER_AGENT
+      },
+      timeout: REQUEST_TIMEOUT_MS
     });
 
     const $ = cheerio.load(response.data);
@@ -56,9 +65,65 @@ export async function fetchTopProducts(): Promise<Product[]> {
 
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
-        console.error(`Ошибка при запросе к Plati.market: Статус ${error.response?.status}`);
+        console.error(`Ошибка при запросе к Plati.market: ${error.response ? `Статус ${error.response.status}` : `${error.code ?? error.message}`}`);
     } else {
         console.error('Неизвестная ошибка при парсинге Plati.market:', error);
+    }
+    return [];
+  }
+}
+
+interface GgselItem {
+  url: string;
+  name: string;
+  seller_name: string;
+  price_wmr: string;
+  cnt_sell: number;
+}
+
+export async function fetchGgselTopProducts(productSlug: string): Promise<Product[]> {
+  try {
+    const response = await axios.get(GGSEL_API_URL, {
+      params: {
+        url: productSlug,
+        lang: 'ru',
+        currency: 'wmr',
+        limit: 60,
+        page: 1,
+        sort: 'sortByPriceUp',
+        with_forbidden: 0
+      },
+      headers: { 'User-Agent': USER_AGENT },
+      timeout: REQUEST_TIMEOUT_MS
+    });
+
+    const items: GgselItem[] = response.data?.data?.items ?? [];
+    const productList: Product[] = [];
+
+    for (const item of items.slice(0, 5)) {
+      const price = parseFloat(item.price_wmr);
+      if (item.name && item.url && !isNaN(price)) {
+        productList.push({
+          name: item.name,
+          seller: item.seller_name,
+          sales: String(item.cnt_sell),
+          price,
+          href: `${GGSEL_PRODUCT_URL}${item.url}`
+        });
+      }
+    }
+
+    if (productList.length === 0) {
+      console.log(`Ggsel: нет товаров для "${productSlug}".`);
+    }
+
+    return productList;
+
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error(`Ошибка при запросе к Ggsel: ${error.response ? `Статус ${error.response.status}` : `${error.code ?? error.message}`}`);
+    } else {
+      console.error('Неизвестная ошибка при парсинге Ggsel:', error);
     }
     return [];
   }

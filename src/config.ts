@@ -14,8 +14,13 @@ export const config = {
   botToken: getEnvVar('TELEGRAM_BOT_TOKEN'),
   receiverId: parseInt(getEnvVar('TELEGRAM_RECEIVER_ID'), 10),
   platiMarketCategoryId: getEnvVar('PLATI_CATEGORY_ID'),
+  checkIntervalSec: parseInt(process.env.CHECK_INTERVAL_SEC ?? '300', 10),
 };
 
 if (isNaN(config.receiverId)) {
   throw new Error('TELEGRAM_RECEIVER_ID должен быть числом.');
+}
+
+if (isNaN(config.checkIntervalSec) || config.checkIntervalSec < 1) {
+  throw new Error('CHECK_INTERVAL_SEC должен быть положительным числом.');
 }
